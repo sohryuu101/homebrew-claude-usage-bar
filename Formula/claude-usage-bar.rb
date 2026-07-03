@@ -1,10 +1,11 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.2.1.tar.gz"
-  sha256 "53e654616741617260d46bb0e9535395af5279a4f89f534e424fc831b11a9a9c"
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.3.0.tar.gz"
+  sha256 "170b87c710d45a34cf8e3e7358f3a16170d212142812a86baeba1ae1d09e8671"
 
   depends_on macos: :sonoma
+  depends_on "zstd"
 
   def install
     odie "Swift compiler is required. Install Xcode Command Line Tools with: xcode-select --install" unless which("swift")
