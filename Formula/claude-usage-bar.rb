@@ -1,8 +1,8 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "c5d11ff429e2d3a392a5c5b58a9adf904a4c6f259871d498aa49920d14d56048"
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "d3eb8203cf97eccead37354fdfa7b748b68563268c1781f9a1ca445325b32e16"
 
   depends_on macos: :sonoma
 
@@ -35,7 +35,7 @@ class ClaudeUsageBar < Formula
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string>0.1.0</string>
+        <string>0.1.1</string>
         <key>CFBundleVersion</key>
         <string>1</string>
         <key>LSMinimumSystemVersion</key>
