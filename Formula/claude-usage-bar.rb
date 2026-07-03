@@ -50,7 +50,19 @@ class ClaudeUsageBar < Formula
 
     (bin/"claude-usage-bar").write <<~SH
       #!/bin/bash
-      open "#{app}"
+      case "$1" in
+        stop)
+          killall ClaudeUsageBar 2>/dev/null || true
+          ;;
+        restart)
+          killall ClaudeUsageBar 2>/dev/null || true
+          sleep 1
+          open "#{app}"
+          ;;
+        start|*)
+          open "#{app}"
+          ;;
+      esac
     SH
     chmod 0755, bin/"claude-usage-bar"
 
