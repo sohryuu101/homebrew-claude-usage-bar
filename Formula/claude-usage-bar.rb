@@ -1,8 +1,8 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.1.1.tar.gz"
-  sha256 "d3eb8203cf97eccead37354fdfa7b748b68563268c1781f9a1ca445325b32e16"
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.2.0.tar.gz"
+  sha256 "64e52559dddd2a8b4ae731eb7d0dca7140cb41f7ce9933595742b6d0fd3a510d"
 
   depends_on macos: :sonoma
 
@@ -35,7 +35,7 @@ class ClaudeUsageBar < Formula
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string>0.1.1</string>
+        <string>0.2.0</string>
         <key>CFBundleVersion</key>
         <string>1</string>
         <key>LSMinimumSystemVersion</key>
@@ -53,6 +53,9 @@ class ClaudeUsageBar < Formula
       open "#{app}"
     SH
     chmod 0755, bin/"claude-usage-bar"
+
+    cli_executable = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/claude-usage"
+    bin.install cli_executable
   end
 
   def caveats
