@@ -4,10 +4,11 @@ class ClaudeUsageBar < Formula
   url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.1.0.tar.gz"
   sha256 "c5d11ff429e2d3a392a5c5b58a9adf904a4c6f259871d498aa49920d14d56048"
 
-  depends_on xcode: ["16.0", :build]
   depends_on macos: :sonoma
 
   def install
+    odie "Swift compiler is required. Install Xcode Command Line Tools with: xcode-select --install" unless which("swift")
+
     system "swift", "build", "-c", "release", "--disable-sandbox", "--arch", Hardware::CPU.arch.to_s
 
     executable = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/ClaudeUsageBar"
