@@ -23,6 +23,9 @@ on:
         default: true
         type: boolean
 
+env:
+  HOMEBREW_NO_REQUIRE_TAP_TRUST: "1"
+
 permissions:
   contents: write
 
