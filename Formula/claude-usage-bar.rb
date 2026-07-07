@@ -1,8 +1,8 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.6.0.tar.gz"
-  sha256 "c8265e072d88b1940ce6222a192feb70f7ea16e2ad917a1a3f6f7d32b013b0c4"
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.6.1.tar.gz"
+  sha256 "b3693c75b05d59f45c42e499c98c27cab3dea2cda19ccc615f00888de97d3117"
 
   depends_on macos: :sonoma
   depends_on "zstd"
@@ -15,14 +15,12 @@ class ClaudeUsageBar < Formula
     system "swift", "build", "-c", "release", "--disable-sandbox", "--arch", Hardware::CPU.arch.to_s
 
     executable = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/ClaudeUsageBar"
-    bundle = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/ClaudeUsageBar_ClaudeUsageBar.bundle"
     app = prefix/"Claude Usage Bar.app"
 
     (app/"Contents/MacOS").mkpath
     (app/"Contents/Resources").mkpath
     cp executable, app/"Contents/MacOS/ClaudeUsageBar"
-    cp_r bundle, app/"Contents/Resources/ClaudeUsageBar_ClaudeUsageBar.bundle"
-    cp_r bundle, app/"ClaudeUsageBar_ClaudeUsageBar.bundle"
+    cp buildpath/"Sources/ClaudeUsageBar/Resources/clawd.png", app/"Contents/Resources/clawd.png"
 
     (app/"Contents/Info.plist").write <<~PLIST
       <?xml version="1.0" encoding="UTF-8"?>
