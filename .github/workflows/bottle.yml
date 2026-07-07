@@ -104,6 +104,16 @@ jobs:
             --root-url="$ROOT_URL" \
             "$FORMULA"
 
+      - name: Rename bottle assets to single-hyphen
+        run: |
+          for f in *--*.bottle.*; do
+            if [ -f "$f" ]; then
+              new_name=$(echo "$f" | sed 's/--/-/g')
+              mv "$f" "$new_name"
+              echo "Renamed $f to $new_name"
+            fi
+          done
+
       - name: Create release and upload bottle assets
         env:
           GH_TOKEN: ${{ github.token }}
