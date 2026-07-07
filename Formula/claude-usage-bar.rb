@@ -4,6 +4,13 @@ class ClaudeUsageBar < Formula
   url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.6.5.tar.gz"
   sha256 "fd72b735add138943d5754864197a5c31f4377ff6b4cc51792f5ca82597936df"
 
+  bottle do
+    root_url "https://github.com/sohryuu101/homebrew-claude-usage-bar/releases/download/v0.6.5"
+    rebuild 1
+    sha256                               arm64_sonoma: "964ec7575a0c611e2f081ea432eeb5a57539b0a2f266166b0e615ceefa77a78c"
+    sha256 cellar: :any_skip_relocation, sequoia:      "af3ed9d23fa11d814395d4e547b99930e180eb6bfeab5bd7f5b62ce544124e66"
+  end
+
   depends_on macos: :sonoma
   depends_on "zstd"
 
