@@ -155,6 +155,7 @@ jobs:
       - name: Generate bottle block patch
         run: |
           brew bottle --merge --write --no-commit bottle-artifacts/*.bottle.json
+          cp "$(brew --repository sohryuu101/claude-usage-bar)/Formula/claude-usage-bar.rb" Formula/claude-usage-bar.rb
           git diff -- Formula > bottle-artifacts/bottle-block.patch
 
           echo "Bottle block patch:"
