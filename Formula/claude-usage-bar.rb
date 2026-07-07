@@ -22,6 +22,7 @@ class ClaudeUsageBar < Formula
     (app/"Contents/Resources").mkpath
     cp executable, app/"Contents/MacOS/ClaudeUsageBar"
     cp_r bundle, app/"Contents/Resources/ClaudeUsageBar_ClaudeUsageBar.bundle"
+    cp_r bundle, app/"ClaudeUsageBar_ClaudeUsageBar.bundle"
 
     (app/"Contents/Info.plist").write <<~PLIST
       <?xml version="1.0" encoding="UTF-8"?>
