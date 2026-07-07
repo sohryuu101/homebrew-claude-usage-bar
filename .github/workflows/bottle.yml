@@ -1,0 +1,130 @@
+name: Build Homebrew Bottle
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag for bottle assets, for example v0.4.0"
+        required: true
+        type: string
+      formula:
+        description: "Formula name to bottle"
+        required: true
+        default: "claude-usage-bar"
+        type: string
+      commit_bottle_block:
+        description: "Commit and push the generated bottle block to this tap"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  bottle:
+    name: Bottle ${{ inputs.formula }} on ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - macos-14
+          - macos-15-intel
+
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+
+      - name: Configure Homebrew
+        run: |
+          brew update-reset
+          brew developer on
+
+      - name: Build bottle
+        env:
+          FORMULA: ${{ inputs.formula }}
+          ROOT_URL: https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}
+        run: |
+          brew test-bot \
+            --only-formulae \
+            --skip-dependents \
+            --root-url="$ROOT_URL" \
+            "$FORMULA"
+
+      - name: Create release and upload bottle assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" \
+              --title "$RELEASE_TAG" \
+              --notes "Homebrew bottles for $RELEASE_TAG"
+
+          gh release upload "$RELEASE_TAG" ./*.bottle.* --clobber
+
+      - name: Collect bottle assets
+        run: |
+          mkdir -p bottle-artifacts
+          cp ./*.bottle.* bottle-artifacts/
+
+      - name: Upload bottle assets artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle-assets-${{ matrix.runner }}
+          path: bottle-artifacts/
+
+  merge-bottles:
+    name: Merge bottle block
+    runs-on: macos-14
+    needs: bottle
+
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Homebrew
+        run: |
+          brew update-reset
+          brew developer on
+
+      - name: Download bottle assets
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bottle-assets-*
+          path: bottle-artifacts
+          merge-multiple: true
+
+      - name: Generate bottle block patch
+        run: |
+          brew bottle --merge --write --no-commit bottle-artifacts/*.bottle.json
+          git diff -- Formula > bottle-artifacts/bottle-block.patch
+
+          echo "Bottle block patch:"
+          cat bottle-artifacts/bottle-block.patch
+
+      - name: Commit bottle block
+        if: ${{ inputs.commit_bottle_block }}
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          FORMULA: ${{ inputs.formula }}
+        run: |
+          if git diff --quiet -- Formula; then
+            echo "No bottle block changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula
+          git commit -m "Add bottle for ${FORMULA} ${RELEASE_TAG}"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      - name: Upload bottle block patch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle-block-${{ inputs.release_tag }}
+          path: bottle-artifacts/

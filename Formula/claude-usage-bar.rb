@@ -1,14 +1,16 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.4.0.tar.gz"
-  sha256 "c943399d5ab1a855d669ce33bb7fb7599a283f80b44a8b06c90c0910c97eea39"
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.5.0.tar.gz"
+  sha256 "c725bb60ecb19b04fd4ea322a0a2d3ea57a0566b483b51cb0709081f6e21f1dc"
 
   depends_on macos: :sonoma
   depends_on "zstd"
 
   def install
-    odie "Swift compiler is required. Install Xcode Command Line Tools with: xcode-select --install" unless which("swift")
+    unless which("swift")
+      odie "Swift compiler is required. Install Xcode Command Line Tools with: xcode-select --install"
+    end
 
     system "swift", "build", "-c", "release", "--disable-sandbox", "--arch", Hardware::CPU.arch.to_s
 
@@ -36,7 +38,7 @@ class ClaudeUsageBar < Formula
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string>0.2.0</string>
+        <string>#{version}</string>
         <key>CFBundleVersion</key>
         <string>1</string>
         <key>LSMinimumSystemVersion</key>
