@@ -1,15 +1,8 @@
 class ClaudeUsageBar < Formula
   desc "Native macOS menu bar app for local Claude usage monitoring"
   homepage "https://github.com/sohryuu101/claude-usage-bar"
-  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.6.1.tar.gz"
-  sha256 "b3693c75b05d59f45c42e499c98c27cab3dea2cda19ccc615f00888de97d3117"
-
-  bottle do
-    root_url "https://github.com/sohryuu101/homebrew-claude-usage-bar/releases/download/v0.6.1"
-    rebuild 1
-    sha256                               arm64_sonoma: "131f43572c446d619631864ef3839483841f82e8ec54664adc1ac9f1147f14d3"
-    sha256 cellar: :any_skip_relocation, sequoia:      "d701c8b3bb1628c0cd5c54aed94ca752ce011b640631ad1c836e54ede0fb4d30"
-  end
+  url "https://github.com/sohryuu101/claude-usage-bar/archive/refs/tags/v0.6.2.tar.gz"
+  sha256 "9db4dee9739227270d0a8fe26956135f6b4dff69ccadc53856d36efd3e2ad907"
 
   depends_on macos: :sonoma
   depends_on "zstd"
