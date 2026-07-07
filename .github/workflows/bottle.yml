@@ -88,6 +88,7 @@ jobs:
         run: |
           brew update-reset
           brew developer on
+          brew tap sohryuu101/claude-usage-bar "$(pwd)"
 
       - name: Build bottle
         env:
@@ -139,6 +140,7 @@ jobs:
         run: |
           brew update-reset
           brew developer on
+          brew tap sohryuu101/claude-usage-bar "$(pwd)"
 
       - name: Download bottle assets
         uses: actions/download-artifact@v4
