@@ -1,6 +1,11 @@
 name: Build Homebrew Bottle
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Formula/claude-usage-bar.rb'
   workflow_dispatch:
     inputs:
       release_tag:
@@ -22,8 +27,51 @@ permissions:
   contents: write
 
 jobs:
+  setup:
+    name: Setup Variables
+    runs-on: macos-14
+    outputs:
+      release_tag: ${{ steps.vars.outputs.release_tag }}
+      formula: ${{ steps.vars.outputs.formula }}
+      commit_bottle_block: ${{ steps.vars.outputs.commit_bottle_block }}
+      should_run: ${{ steps.vars.outputs.should_run }}
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+
+      - name: Compute variables
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "release_tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+            echo "formula=${{ inputs.formula }}" >> $GITHUB_OUTPUT
+            echo "commit_bottle_block=${{ inputs.commit_bottle_block }}" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            # Avoid running if push is by github-actions[bot] (which updates the bottle block)
+            if [ "${{ github.actor }}" = "github-actions[bot]" ]; then
+              echo "should_run=false" >> $GITHUB_OUTPUT
+            else
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+            
+            # Extract tag version from url line in Formula
+            VERSION_TAG=$(grep -oE 'tags/[v0-9.-]+\.tar\.gz' Formula/claude-usage-bar.rb | head -n1 | cut -d'/' -f2 | sed 's/\.tar\.gz//')
+            if [ -z "$VERSION_TAG" ]; then
+              # Fallback to brew info
+              VERSION=$(brew info --json Formula/claude-usage-bar.rb | jq -r '.[0].versions.stable')
+              VERSION_TAG="v$VERSION"
+            fi
+            echo "Computed version tag: $VERSION_TAG"
+            echo "release_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+            echo "formula=claude-usage-bar" >> $GITHUB_OUTPUT
+            echo "commit_bottle_block=true" >> $GITHUB_OUTPUT
+          fi
+
   bottle:
-    name: Bottle ${{ inputs.formula }} on ${{ matrix.runner }}
+    name: Bottle ${{ needs.setup.outputs.formula }} on ${{ matrix.runner }}
+    needs: setup
+    if: needs.setup.outputs.should_run == 'true'
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -43,8 +91,8 @@ jobs:
 
       - name: Build bottle
         env:
-          FORMULA: ${{ inputs.formula }}
-          ROOT_URL: https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}
+          FORMULA: ${{ needs.setup.outputs.formula }}
+          ROOT_URL: https://github.com/${{ github.repository }}/releases/download/${{ needs.setup.outputs.release_tag }}
         run: |
           brew test-bot \
             --only-formulae \
@@ -55,7 +103,7 @@ jobs:
       - name: Create release and upload bottle assets
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ needs.setup.outputs.release_tag }}
         run: |
           gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
             gh release create "$RELEASE_TAG" \
@@ -78,7 +126,8 @@ jobs:
   merge-bottles:
     name: Merge bottle block
     runs-on: macos-14
-    needs: bottle
+    needs: [setup, bottle]
+    if: needs.setup.outputs.should_run == 'true'
 
     steps:
       - name: Check out tap
@@ -107,10 +156,10 @@ jobs:
           cat bottle-artifacts/bottle-block.patch
 
       - name: Commit bottle block
-        if: ${{ inputs.commit_bottle_block }}
+        if: ${{ needs.setup.outputs.commit_bottle_block == 'true' }}
         env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
-          FORMULA: ${{ inputs.formula }}
+          RELEASE_TAG: ${{ needs.setup.outputs.release_tag }}
+          FORMULA: ${{ needs.setup.outputs.formula }}
         run: |
           if git diff --quiet -- Formula; then
             echo "No bottle block changes to commit."
@@ -126,5 +175,5 @@ jobs:
       - name: Upload bottle block patch artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bottle-block-${{ inputs.release_tag }}
+          name: bottle-block-${{ needs.setup.outputs.release_tag }}
           path: bottle-artifacts/
