@@ -15,11 +15,13 @@ class ClaudeUsageBar < Formula
     system "swift", "build", "-c", "release", "--disable-sandbox", "--arch", Hardware::CPU.arch.to_s
 
     executable = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/ClaudeUsageBar"
+    bundle = buildpath/".build/#{Hardware::CPU.arch}-apple-macosx/release/ClaudeUsageBar_ClaudeUsageBar.bundle"
     app = prefix/"Claude Usage Bar.app"
 
     (app/"Contents/MacOS").mkpath
     (app/"Contents/Resources").mkpath
     cp executable, app/"Contents/MacOS/ClaudeUsageBar"
+    cp_r bundle, app/"Contents/Resources/ClaudeUsageBar_ClaudeUsageBar.bundle"
 
     (app/"Contents/Info.plist").write <<~PLIST
       <?xml version="1.0" encoding="UTF-8"?>
